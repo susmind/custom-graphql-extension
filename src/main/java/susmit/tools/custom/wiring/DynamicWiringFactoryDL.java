@@ -23,6 +23,7 @@ import org.mule.runtime.core.api.construct.Flow;
 import org.mule.runtime.core.api.event.CoreEvent;
 import org.mule.runtime.core.api.event.EventContextFactory;
 import org.mule.runtime.dsl.api.component.config.DefaultComponentLocation;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.idl.FieldWiringEnvironment;
 import graphql.schema.idl.WiringFactory;
+import susmit.tools.custom.error.GraphQLCustomError;
 
 //Gets executed when the GraphQL server is executed against a query or mutation
 public class DynamicWiringFactoryDL implements WiringFactory {
@@ -137,9 +139,8 @@ public class DynamicWiringFactoryDL implements WiringFactory {
 
         } catch (MuleException ex) {
             logger.error("Error while trying to execute the flow", ex);
+            throw new ModuleException(GraphQLCustomError.EXECUTION_FAILURE, ex);
         }
-
-        return null;
     }
     
 
@@ -170,9 +171,8 @@ public class DynamicWiringFactoryDL implements WiringFactory {
 
         } catch (MuleException ex) {
             logger.error("Error while trying to execute the flow", ex);
+            throw new ModuleException(GraphQLCustomError.EXECUTION_FAILURE, ex);
         }
-
-        return null;
     }
 	
     private boolean flowExistsForField(String fieldName) {

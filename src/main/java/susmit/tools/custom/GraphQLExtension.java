@@ -3,6 +3,9 @@ package susmit.tools.custom;
 import org.mule.runtime.extension.api.annotation.Extension;
 import org.mule.runtime.extension.api.annotation.Configurations;
 import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
+import org.mule.runtime.extension.api.annotation.error.ErrorTypes;
+
+import susmit.tools.custom.error.GraphQLCustomError;
 
 
 /**
@@ -12,6 +15,7 @@ import org.mule.runtime.extension.api.annotation.dsl.xml.Xml;
 @Xml(prefix = "graphql")
 @Extension(name = "GraphQL")
 @Configurations(GraphQLConfiguration.class)
+@ErrorTypes(GraphQLCustomError.class)
 public class GraphQLExtension {
 
 }

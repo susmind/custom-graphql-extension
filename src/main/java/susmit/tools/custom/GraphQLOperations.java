@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.mule.runtime.extension.api.annotation.param.MediaType;
 import org.mule.runtime.extension.api.annotation.param.display.DisplayName;
+import org.mule.runtime.extension.api.exception.ModuleException;
 import org.mule.runtime.extension.api.runtime.operation.Result;
 import org.mule.runtime.extension.api.runtime.route.Route;
 import org.mule.runtime.extension.api.runtime.streaming.StreamingHelper;
@@ -21,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import graphql.ExecutionInput;
 import graphql.ExecutionResult;
 import graphql.GraphQLError;
+import susmit.tools.custom.error.ExecuteErrorProvider;
+import susmit.tools.custom.error.GraphQLCustomError;
 
 import org.mule.runtime.api.component.location.ComponentLocation;
 import org.mule.runtime.api.el.BindingContext;
@@ -39,6 +42,7 @@ import org.mule.runtime.core.api.event.EventContextFactory;
 import org.mule.runtime.core.internal.routing.ChoiceRouter;
 import org.mule.runtime.core.privileged.processor.AbstractInterceptingMessageProcessor;
 import org.mule.runtime.extension.api.annotation.Configurations;
+import org.mule.runtime.extension.api.annotation.error.Throws;
 import org.mule.runtime.extension.api.annotation.execution.Execution;
 import org.mule.runtime.extension.api.annotation.param.Config;
 import org.mule.runtime.extension.api.annotation.param.Content;
@@ -57,14 +61,17 @@ public class GraphQLOperations {
 	
 	@DisplayName("GraphQL Router")
 	@MediaType("application/json")
+	@Throws(ExecuteErrorProvider.class)
 	public Result<String, Map> route(@Config GraphQLConfiguration config,
 			@Content Map<String,Object> content, ComponentLocation location) {
 		
 		if(content == null)
 		{
-			throw new RuntimeException("Payload is not valid");
+			throw new ModuleException(GraphQLCustomError.EXECUTION_FAILURE, new RuntimeException("Payload is not valid")); 
 		}
 		
+		try
+		{
 		logger.debug("Content received: " + content.toString());
 		
 		String query = (String) content.get("query");
@@ -89,13 +96,18 @@ public class GraphQLOperations {
         BindingContext ctx = BindingContext.builder()
                 .addBinding("payload", new TypedValue(data, DataType.fromType(data.getClass())))
                 .build();
-		
+        
+			
 		return Result.<String, Map>builder().attributes(new HashMap<String, String>())
                 .mediaType(org.mule.runtime.api.metadata.MediaType.APPLICATION_JSON)
                 .output(expressionManager.evaluate("payload", DataType.JSON_STRING, ctx).getValue().toString())
                 .build();
+		}
+		catch (Exception ex)
+		{
+			throw new ModuleException(GraphQLCustomError.EXECUTION_FAILURE, ex);
+		}
+		
 	}
-	
-	
 
 }

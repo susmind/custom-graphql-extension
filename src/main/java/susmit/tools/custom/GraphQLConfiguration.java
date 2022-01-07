@@ -75,6 +75,7 @@ public class GraphQLConfiguration implements Startable {
 		{
 			logger.error("Error occured in loading configuration: " + ex.getMessage());
 			ex.printStackTrace();
+			throw ex;  //Throws error during application loading process
 		}
 	}
 
