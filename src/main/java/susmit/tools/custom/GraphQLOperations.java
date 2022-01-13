@@ -91,6 +91,9 @@ public class GraphQLOperations {
 		
 		List<GraphQLError> errors = executionResult.getErrors();
 		
+		//Raise a sample error
+		if(errors.size() > 0) throw new RuntimeException(errors.get(0).getMessage());
+		
 		logger.debug("Output data: " + data.toString());
 		
         BindingContext ctx = BindingContext.builder()
